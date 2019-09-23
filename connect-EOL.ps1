@@ -96,7 +96,8 @@ function Connect-EOL {
 
 if ($AuthFile) {
   $creds = Import-Clixml -Path $AuthFile
-  Connect-EOL -Credential $creds
+  if (Connect-EOL -Credential $creds) {Write-Host "EOL connected" -ForegroundColor Green}
+  else {Write-Host "EOL connection failed" -ForegroundColor Red}
 }
 elseif ($Credential) {
   Connect-EOL -Credential $Credential
