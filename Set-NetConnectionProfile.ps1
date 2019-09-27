@@ -2,7 +2,7 @@
 #### requires ps-version 3.0 ####
 <#
 .SYNOPSIS
-	<The script prevents changing connection profile via NLA service>
+	<The script prevents changing connection profile by NLA service>
 .DESCRIPTION
 <Brief description of script>
 .PARAMETER <Parameter_Name>
