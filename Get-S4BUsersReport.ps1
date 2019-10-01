@@ -1,5 +1,8 @@
-﻿$colAllOnPremS4BUsers = Import-Csv "C:\Work\Kering\Scripts\Reports\S4Breport4MigrationSRC_190919.csv" -Delimiter "|"
-$Credential = Import-Clixml -Path "C:\Work\Kering\Scripts\Creds\FJMessagingGlobalAdmin@kering.onmicrosoft.com.txt"
+﻿$InputUserList = "S4Breport4MigrationSRC_190919.csv"
+$CredXmlFile = "GlobalAdmin.txt"
+
+$colAllOnPremS4BUsers = Import-Csv $InputUserList -Delimiter "|"
+$Credential = Import-Clixml -Path $CredXmlFile
 Connect-AzureAD -Credential $Credential | out-null
 
 $colAllUsers2Report = @()
