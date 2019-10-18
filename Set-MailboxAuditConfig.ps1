@@ -74,6 +74,13 @@ $MbxListFile = "C:\temp\AllMailboxes.txt"
 $MailboxUpnList =  Get-Content -Path $MbxListFile
 
 ForEach ($MailboxUpn in $MailboxUpnList) {
-    Write-Progress -activity "Altering Audit Config for $(($MailboxUpnList | Measure-Object).count) mailboxes…" -PercentComplete ($i / ($MailboxUpnList | Measure-Object).count * 100) -status "$(([math]::round((($i / ($MailboxUpnList | Measure-Object).count * 100)))))%";$i++
-
+   Write-Progress -activity "Altering Audit Config for $(($MailboxUpnList | Measure-Object).count) mailboxes..." -PercentComplete ($i / ($MailboxUpnList | Measure-Object).count * 100) -status "$(([math]::round((($i / ($MailboxUpnList | Measure-Object).count * 100)))))%";$i++
+   Write-Host "         $($MailboxUpn)"
+   Set-Mailbox -Identity $MailboxUpn -AuditOwner @{Add="MailboxLogin"} 
+   if ($?) {
+      Write-Host "=> success"
+   }
+   else {
+      Write-Host "=> fail"
+   }
 }
