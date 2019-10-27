@@ -51,7 +51,7 @@ Function Set-O365LicensePack {
 
 #$colUsers2Fix = Get-Clipboard
 $colReport= @()
-$scriptDir = [System.IO.Path]::GetDirectoryName($myInvocation.MyCommand.Definition)
+#$scriptDir = [System.IO.Path]::GetDirectoryName($myInvocation.MyCommand.Definition)
 
 $SkuFeaturesToDisable = @("YAMMER_ENTERPRISE")
 
