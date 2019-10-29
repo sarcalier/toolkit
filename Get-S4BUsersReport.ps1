@@ -1,5 +1,5 @@
-﻿$InputUserList = "S4Breport4MigrationSRC_190919.csv"
-$CredXmlFile = "GlobalAdmin.txt"
+﻿$InputUserList = "C:\temp\S4B_users_291019.csv"
+#$CredXmlFile = "GlobalAdmin.txt"
 
 $colAllOnPremS4BUsers = Import-Csv $InputUserList -Delimiter "|"
 $Credential = Import-Clixml -Path $CredXmlFile
