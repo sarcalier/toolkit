@@ -129,7 +129,8 @@ $LicPacksToSearch = @("STANDARDPACK","ENTERPRISEPACK","ENTERPRISEPREMIUM")
 #$colUPNS = Get-Clipboard
 ForEach ($UPN in $colUPNS) {
    Write-Output "Processing: $UPN"
-   if (Get-AzureADUser -ObjectId $UPN) {
+   try {$AzADUser = Get-AzureADUser -ObjectId $UPN -ErrorAction stop} catch {$AzADUser = $false}
+   if ($AzADUser) {
       Write-Output "Success: Azure AD user found"
       $result = Remove-LicPlanFromUser -UPN $UPN -LicPlans2Disable $LicPlans2Disable -TenantSubSKUs $TenantSubSKUs -LicPacksToSearch $LicPacksToSearch
       if ($result -eq $true) {
