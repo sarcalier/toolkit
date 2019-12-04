@@ -76,7 +76,6 @@ Function Remove-LicPlanFromUser {
    #getting Azure Ad user
    $AzADUser = Get-AzureADUser -ObjectId $UPN
 
-   
    #Detect SkuIDs for list of Licens Pack provided
    $TenantLicPackSKUs = ($TenantSubSKUs | Where-Object {$_.SkuPartNumber -in $LicPacksToSearch}).SkuId
 
@@ -87,12 +86,13 @@ Function Remove-LicPlanFromUser {
    if ($UserLickPackSKUDetected) {
       
       #converting License Plan names 2 disable to SkuIDs
-      $LicPlans2DisableSKUs = (($TenantSubSKUs | Where-Object {$_.SkuId -eq "$UserLickPackSKUDetected"}).ServicePlans | Where-Object {$_.ServicePlanName -in $LicPlans2Disable}).ServicePlanId
+      $LicPlans2DisableSKUs = @()
+      $LicPlans2DisableSKUs += (($TenantSubSKUs | Where-Object {$_.SkuId -eq "$UserLickPackSKUDetected"}).ServicePlans | Where-Object {$_.ServicePlanName -in $LicPlans2Disable}).ServicePlanId
       
       #detecting if there are License Plans already disabled
       $LicPlansDisabledBefore = ($AzADUser.AssignedLicenses | Where-Object {$UserLickPackSKUDetected -eq $_.SkuId}).DisabledPlans
       if ($LicPlansDisabledBefore) {
-         $LicPlans2DisableSKUs +=  $LicPlansDisabledBefore
+         $LicPlans2DisableSKUs += $LicPlansDisabledBefore
          $LicPlans2DisableSKUs = $LicPlans2DisableSKUs |Sort-Object -Unique
       }
 
@@ -104,10 +104,17 @@ Function Remove-LicPlanFromUser {
       $licenses.AddLicenses = $license
 
       #final license assignement
-      Set-AzureADUserLicense -ObjectId $UPN -AssignedLicenses $licenses -ErrorAction stop
+      try {
+         Set-AzureADUserLicense -ObjectId $UPN -AssignedLicenses $licenses -ErrorAction stop 
+         return $true
+      }
+      catch {
+         Write-Host "Error: while assigning the license"
+         return $false
+      }
    }
    else {
-      Write-Output "No target License Pack assigned"
+      Write-Host "Information: No target License Pack assigned"
       return $false
    }
 }
@@ -116,9 +123,24 @@ Function Remove-LicPlanFromUser {
 #---------------------------------------------------------[Main]--------------------------------------------------------
 
 $TenantSubSKUs = Get-AzureADSubscribedSku
-$LicPlans2Disable = @("MYANALYTICS_P2","YAMMER_ENTERPRISE")
-$LicPacksToSearch = @("DESKLESSPACK","STANDARDPACK","ENTERPRISEPACK","ENTERPRISEPREMIUM")
+$LicPlans2Disable = @("MYANALYTICS_P2")
+$LicPacksToSearch = @("STANDARDPACK","ENTERPRISEPACK","ENTERPRISEPREMIUM")
 
-Remove-LicPlanFromUser -UPN Ruslan.Gatiyatullin-ext@kering.com -LicPlans2Disable $LicPlans2Disable -TenantSubSKUs $TenantSubSKUs -LicPacksToSearch $LicPacksToSearch
-
-
+#$colUPNS = Get-Clipboard
+ForEach ($UPN in $colUPNS) {
+   Write-Output "Processing: $UPN"
+   if (Get-AzureADUser -ObjectId $UPN) {
+      Write-Output "Success: Azure AD user found"
+      $result = Remove-LicPlanFromUser -UPN $UPN -LicPlans2Disable $LicPlans2Disable -TenantSubSKUs $TenantSubSKUs -LicPacksToSearch $LicPacksToSearch
+      if ($result -eq $true) {
+         Write-Output "Success: $UPN License Pack modified"
+      }
+      else {
+         Write-Output "Error: $UPN License Pack not modified"
+      }
+   }
+   else {
+      Write-Output "Information: No Azure AD user found"
+   }
+   Write-Output "---"
+}
